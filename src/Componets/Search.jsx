@@ -7,13 +7,12 @@ function Search() {
   const [results, setResults]     = useState([])
   const [error, setError]         = useState(null)
   const abortRef = useRef(null)
-  console.log(results);
 
   useEffect(() => {
     const trimmed = query.trim()
     const encoded = encodeURIComponent(trimmed)
   
-    if (!trimmed) {
+    if (!trimmed && trimmed.length < 2) {
       if (abortRef.current) abortRef.current.abort()
       setResults([])
       setIsLoading(false)
@@ -45,7 +44,9 @@ function Search() {
     }
   
     const timerID = setTimeout(fetchSearch, 300)
-    return () => clearTimeout(timerID)
+    return () => {
+      clearTimeout(timerID)
+    }
   }, [query])
 
   return (
@@ -59,10 +60,26 @@ function Search() {
         <p>No Results Found</p>
       )}
 
-      <div style={{ marginTop: '10px', padding: '10px' }}>
-        {results.map((el) => (
-          <div key={el.id}>{el.title}</div>
-        ))}
+      <div style={{ marginTop: '10px' }}>
+      {
+  results.length > 0 && (
+    <div style={{border:"1px solid gray"}}>
+
+      {
+        results.map((item, index) => (
+
+          <div
+            key={item.id}
+            style={{padding:"10px"}}
+          >
+            {item.title}
+          </div>
+        ))
+      }
+
+    </div>
+  )
+}
       </div>
     </div>
   )
