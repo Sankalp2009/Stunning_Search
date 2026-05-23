@@ -6,55 +6,44 @@ function Search() {
   const [isLoading, setIsLoading] = useState(false)
   const [results, setResults]     = useState([])
   const [error, setError]         = useState(null)
-
   const abortRef = useRef(null)
-  const cacheRef = useRef({})      // { "phone": [...products], "lip": [...] }
+  console.log(results);
 
   useEffect(() => {
     const trimmed = query.trim()
     const encoded = encodeURIComponent(trimmed)
-
+  
     if (!trimmed) {
+      if (abortRef.current) abortRef.current.abort()
       setResults([])
       setIsLoading(false)
       return
     }
-
-    // ✅ Cache HIT — return instantly, no fetch needed
-    if (cacheRef.current[trimmed]) {
-      setResults(cacheRef.current[trimmed])
-      setIsLoading(false)
-      setError(null)
-      return
-    }
-
-    // ✅ Cache MISS — fetch from API and store result
+  
     const fetchSearch = async () => {
       if (abortRef.current) abortRef.current.abort()
       abortRef.current = new AbortController()
-
       setError(null)
       setIsLoading(true)
-
+  
       try {
-        const res  = await fetch(
+        const res = await fetch(
           `https://dummyjson.com/products/search?q=${encoded}`,
           { signal: abortRef.current.signal }
         )
         if (!res.ok) throw new Error(`HTTP ${res.status}`)
-
+  
         const data = await res.json()
         const products = data?.products || []
-
-        cacheRef.current[trimmed] = products   // 💾 store in cache
-        setResults(products)
+        setResults(products)           
+  
       } catch (err) {
         if (err.name !== 'AbortError') setError('Something went wrong.')
       } finally {
-        setIsLoading(false)
+         setIsLoading(false)
       }
     }
-
+  
     const timerID = setTimeout(fetchSearch, 300)
     return () => clearTimeout(timerID)
   }, [query])
