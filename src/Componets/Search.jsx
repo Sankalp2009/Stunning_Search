@@ -9,8 +9,8 @@ function Search() {
   const abortRef              = useRef(null)
 
   useEffect(() => {
-    const trimmed = query.trim()
-
+    const trimmed = encodeURIComponent(query.trim());
+   
     if (!trimmed) {
       setResults([])
       setIsLoading(false)
